@@ -3,5 +3,7 @@
 #
 @{
     # For latest supported version, go to 'https://www.powershellgallery.com/packages/Az'. Uncomment the next line and replace the MAJOR_VERSION, e.g., 'Az' = '5.*'
-    'Az' = '12.*'
+    
+    'Az.Monitor'  = '4.5.0'
+    'Az.Resources'= '6.7.0'
 }

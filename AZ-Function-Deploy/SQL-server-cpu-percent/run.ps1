@@ -51,7 +51,8 @@ $CustomAlertbody = @"
     "overrideQueryTimeRange": "P2D",
     "criteria": {
       "allOf": [
- min(Minimum), CPU_Average = avg(Average) by Resource , MetricName, _ResourceId\n",
+        {
+          "query": min(Minimum), CPU_Average = avg(Average) by Resource , MetricName, _ResourceId\n",
           "timeAggregation": "Average",
           "metricMeasureColumn": "CPU_Average",
           "dimensions": [],
