@@ -50,8 +50,8 @@ foreach ($StorgeresourceGroup in $StorgeresourceGroups) {
         $StorgeResourceId = $Storgeresource.ResourceId
         $StorgeIds = @($StorgeResourceId + "/blobServices/default"
                         $StorgeResourceId + "/fileServices/default"
-                        $StorgeResourceId + "/queueServices/default"
-                        $StorgeResourceId + "/tableServices/default"
+                        #$StorgeResourceId + "/queueServices/default"
+                        #$StorgeResourceId + "/tableServices/default"
         )
     $StorgeIds | ForEach-Object {
         $StorgeAmetric = @()
