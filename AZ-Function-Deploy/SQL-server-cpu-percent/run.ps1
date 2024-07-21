@@ -1,17 +1,3 @@
-# Input bindings are passed in via param block.
-param($Timer)
-
-# Get the current universal time in the default string format
-$currentUTCtime = (Get-Date).ToUniversalTime()
-
-# The 'IsPastDue' porperty is 'true' when the current function invocation is later than scheduled.
-if ($Timer.IsPastDue) {
-    Write-Host "PowerShell timer is running late!"
-}
-
-# Write an information log with the current time.
-Write-Host "PowerShell timer trigger function ran! TIME: $currentUTCtime"
-
 
 $accessToken = (Get-AzAccessToken -ResourceUrl "https://management.azure.com").Token
 
@@ -37,7 +23,7 @@ $CustomAlertbody = @"
   "properties": {
     "createdWithApiVersion": "2023-03-15-preview",
     "displayName": "vf-core-cm-SQL-server-cpu-percent",
-    "description": "",
+    "description": "The CPU percent for a Azure SQL Database has been crossed the threshold value",
     "severity": 0,
     "enabled": true,
     "evaluationFrequency": "PT5M",
@@ -52,7 +38,7 @@ $CustomAlertbody = @"
     "criteria": {
       "allOf": [
         {
-          "query": min(Minimum), CPU_Average = avg(Average) by Resource , MetricName, _ResourceId\n",
+          "query": "AzureMetrics\n| where ResourceProvider == \"MICROSOFT.SQL\" // /DATABASES\n| where TimeGenerated >= ago(60min)\n| where MetricName in ('cpu_percent')\n| summarize CPU_Maximum = max(Maximum), CPU_Minimum = min(Minimum), CPU_Average = avg(Average) by Resource , MetricName, _ResourceId",
           "timeAggregation": "Average",
           "metricMeasureColumn": "CPU_Average",
           "dimensions": [],
@@ -85,7 +71,7 @@ $CustomAlertbody = @"
         
     }
 } else {
-  $functionURI ="https://management.azure.com/subscriptions/f5980816-b478-413b-ae0b-5fb6d820a88f/resourceGroups/vf-core-uk-resources-rg/providers/Microsoft.Web/sites/VF-Core-Function/functions/SQL-server-cpu-percent?api-version=2015-08-01"
+  $functionURI ="https://management.azure.com/subscriptions/f5980816-b478-413b-ae0b-5fb6d820a88f/resourceGroups/vf-core-uk-resources-rg/providers/Microsoft.Web/sites/mos49/functions/SQL-server-cpu-percent?api-version=2015-08-01"
   Invoke-RestMethod -Uri $functionURI -Method Delete -Headers $header 
 
 }

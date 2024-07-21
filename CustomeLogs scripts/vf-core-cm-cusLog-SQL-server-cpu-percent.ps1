@@ -23,7 +23,7 @@ $CustomAlertbody = @"
   "properties": {
     "createdWithApiVersion": "2023-03-15-preview",
     "displayName": "vf-core-cm-SQL-server-cpu-percent",
-    "description": "",
+    "description": "The CPU percent for a Azure SQL Database has been crossed the threshold value",
     "severity": 0,
     "enabled": true,
     "evaluationFrequency": "PT5M",
@@ -37,7 +37,8 @@ $CustomAlertbody = @"
     "overrideQueryTimeRange": "P2D",
     "criteria": {
       "allOf": [
- min(Minimum), CPU_Average = avg(Average) by Resource , MetricName, _ResourceId\n",
+        {
+          "query": "AzureMetrics\n| where ResourceProvider == \"MICROSOFT.SQL\" // /DATABASES\n| where TimeGenerated >= ago(60min)\n| where MetricName in ('cpu_percent')\n| summarize CPU_Maximum = max(Maximum), CPU_Minimum = min(Minimum), CPU_Average = avg(Average) by Resource , MetricName, _ResourceId",
           "timeAggregation": "Average",
           "metricMeasureColumn": "CPU_Average",
           "dimensions": [],
