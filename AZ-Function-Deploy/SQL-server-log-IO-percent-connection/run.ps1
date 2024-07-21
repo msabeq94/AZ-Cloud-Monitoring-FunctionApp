@@ -93,7 +93,7 @@ $CustomAlertbody = @"
         
     }
 } else {
-  $functionURI ="https://management.azure.com/subscriptions/f5980816-b478-413b-ae0b-5fb6d820a88f/resourceGroups/vf-core-uk-resources-rg/providers/Microsoft.Web/sites/mos49/functions/SQL-server-log-IO-percent-connection?api-version=2015-08-01"
+  $functionURI ="https://management.azure.com/subscriptions/f5980816-b478-413b-ae0b-5fb6d820a88f/resourceGroups/vf-core-uk-resources-rg/providers/Microsoft.Web/sites/VF-Core-Function/functions/SQL-server-log-IO-percent-connection?api-version=2015-08-01"
   Invoke-RestMethod -Uri $functionURI -Method Delete -Headers $header 
 
 }
