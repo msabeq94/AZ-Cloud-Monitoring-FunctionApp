@@ -15,8 +15,23 @@ if ($env:MSI_SECRET) {
     Disable-AzContextAutosave -Scope Process | Out-Null
     Connect-AzAccount -Identity
 }
-Import-Module 'Az.*'
 
+
+# profile.ps1
+
+# Specify the modules you need
+# $modules = @('Az.Monitor' ,'Az.Resources', 'Az.Accounts', 'Az.Authorization','Az.MSGraph')
+
+# foreach ($module in $modules) {
+#     if (-not (Get-Module -ListAvailable -Name $module)) {
+#         Install-Module -Name $module -Force -Scope CurrentUser
+#     }
+# }
+# Import-Module 'Az.Monitor'
+# Import-Module 'Az.Resources'
+# Import-Module 'Az.Accounts'
+# Import-Module 'Az.Authorization'
+# Import-Module 'Az.MSGraph'
 # Uncomment the next line to enable legacy AzureRm alias in Azure PowerShell.
 # Enable-AzureRmAlias
 

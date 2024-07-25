@@ -6,11 +6,12 @@ $currentUTCtime = (Get-Date).ToUniversalTime()
 
 # The 'IsPastDue' porperty is 'true' when the current function invocation is later than scheduled.
 if ($Timer.IsPastDue) {
-    Write-Host "PowerShell timer is running late!"
+    write-output "PowerShell timer is running late!"
 }
 
 # Write an information log with the current time.
-Write-Host "PowerShell timer trigger function ran! TIME: $currentUTCtime"
+write-output "PowerShell timer trigger function ran! TIME: $currentUTCtime"
+
 
 
 $accessToken = (Get-AzAccessToken -ResourceUrl "https://management.azure.com").Token
@@ -82,8 +83,8 @@ $CustomAlertbody = @"
         
         Invoke-RestMethod -Uri $CustomAlertURI -Method Put -Headers $header -Body $CustomAlertbody
     } catch {
-        
-    }
+        throw "Terminating exception occurred. Stopping the script."
+      }
 } else {
   $functionURI ="https://management.azure.com/subscriptions/f5980816-b478-413b-ae0b-5fb6d820a88f/resourceGroups/vf-core-uk-resources-rg/providers/Microsoft.Web/sites/VF-Core-Function/functions/SQL-server-data-IO-percent?api-version=2015-08-01"
   Invoke-RestMethod -Uri $functionURI -Method Delete -Headers $header 
