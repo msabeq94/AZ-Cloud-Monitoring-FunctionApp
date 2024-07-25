@@ -55,7 +55,8 @@ if ($null -eq $RGTYScope -and $sqlserversdatabases.count -gt 0) {
     
 
   }
-  $equalsValueTY = $NEWRTyScope.equals
+  $equalsValueRG = $NEWRGScope.equals
+  $equalsValueRGTY =  $NEWRTyScope.equals
 
 
   $AzLogAlertRuleeachLogAlert =  $RGAlert
@@ -72,35 +73,9 @@ if ($null -eq $RGTYScope -and $sqlserversdatabases.count -gt 0) {
           $AzLogAlertRuleExistingConditionResourceGroup = $NEWRGScope | ConvertTo-Json -Depth 10
           $AzLogAlertRuleExistingConditionResourceType = $UpdateNEWRTYScopev2 
 
-          $AzLogAlertRuleExistingConditionV1 = @"
-          {
-              "allOf": [
-                  {
-                      "field": "category",
-                      "equals": "ResourceHealth"
-                  },
-                  {
-                      "anyOf": 
-                      $AzLogAlertRuleExistingConditionResourceGroup
-                  },
-                  {
-                      "anyOf": [
-                        {
-                          "field": "resourceType",
-                          "equals": "$($equalsValueTY)"
-                        },
-                        {
-                          "field": "resourceType",
-                          "equals": "$($newResourceTypev1)"
-                        }
-                      ]
-                      
-                  }
-              ]
-          }
-"@
-
-$AzLogAlertRuleExistingCondition = @"
+          
+#1 RG and 1 RGTY
+$AzLogAlertRuleExistingConditionV1 = @"
 {
     "allOf": [
         {
@@ -108,20 +83,125 @@ $AzLogAlertRuleExistingCondition = @"
             "equals": "ResourceHealth"
         },
         {
-            "anyOf": 
-            $AzLogAlertRuleExistingConditionResourceGroup
+            "anyOf": [
+                {
+                  "field": "resourceGroup",
+                  "equals": "$($equalsValueRG)"
+                }
+              ]
         },
         {
-            "anyOf": 
-            $AzLogAlertRuleExistingConditionResourceType
+            "anyOf": [
+              {
+                "field": "resourceType",
+                "equals": "$($equalsValueRGTY)"
+              },
+              {
+                "field": "resourceType",
+                "equals": "$($newResourceTypev1)"
+              }
+            ]
         }
     ]
 }
 "@
-if ($NEWRTyScope.count -eq 1) {
-  $AzLogAlertRuleExistingCondition = $AzLogAlertRuleExistingConditionV1
- 
+
+      #mult RG & one RGTY
+$AzLogAlertRuleExistingConditionV2 = @"
+{
+"allOf": [
+{
+    "field": "category",
+    "equals": "ResourceHealth"
+},
+{
+    "anyOf": 
+    $AzLogAlertRuleExistingConditionResourceGroup
+},
+{
+    "anyOf": [
+      {
+        "field": "resourceType",
+        "equals": "$($equalsValueRGTY)"
+      },
+      {
+        "field": "resourceType",
+        "equals": "$($newResourceTypev1)"
+      }
+    ]
+    
 }
+]
+}
+"@
+
+#1 RG & mult RGTY
+$AzLogAlertRuleExistingConditionV3 = @"
+{
+"allOf": [
+{
+    "field": "category",
+    "equals": "ResourceHealth"
+},
+{
+    "anyOf": [
+        {
+          "field": "resourceGroup",
+          "equals": "$($equalsValueRG)"
+        },
+
+      ]
+},
+{
+    "anyOf": [
+      {
+        "field": "resourceType",
+        "equals": "$($equalsValueRGTY)"
+      },
+      {
+        "field": "resourceType",
+        "equals": "$($newResourceTypev1)"
+      }
+    ]
+    
+    
+}
+]
+}
+"@
+
+
+#mut RG & Mut RGTY
+$AzLogAlertRuleExistingConditionV4 = @"
+{
+"allOf": [
+{
+  "field": "category",
+  "equals": "ResourceHealth"
+},
+{
+  "anyOf": 
+  $AzLogAlertRuleExistingConditionResourceGroup
+},
+{
+  "anyOf": 
+  $AzLogAlertRuleExistingConditionResourceType
+}
+]
+}
+"@
+
+if ($NEWRGScope.count -eq 1 -and $NEWRTyScope.count -eq 1) {
+$UPAzLogAlertRuleExistingCondition = $AzLogAlertRuleExistingConditionV1
+
+}elseif ($NEWRGScope.count -gt 1 -and $NEWRTyScope.count -eq 1) {
+$UPAzLogAlertRuleExistingCondition = $AzLogAlertRuleExistingConditionV2
+}elseif ($NEWRGScope.count -eq 1 -and $NEWRTyScope.count -gt 1) {
+$UPAzLogAlertRuleExistingCondition = $AzLogAlertRuleExistingConditionv3
+} else {
+$UPAzLogAlertRuleExistingCondition = $AzLogAlertRuleExistingConditionV4
+}
+
 
 $AzLogAlertRuleExistingActions = $AzLogAlertRuleeachLogAlert.properties.actions | ConvertTo-Json
 $AzLogAlertRuleExistingDescription = $AzLogAlertRuleeachLogAlert.properties.description | ConvertTo-Json
@@ -136,7 +216,7 @@ $BodyAzLogAlertRule = @"
     "tags": $AzLogAlertRuleExistingTags,
     "properties": {
         "scopes": $AzLogAlertRuleExistinScopesv2,
-        "condition": $AzLogAlertRuleExistingCondition,
+        "condition": $UPAzLogAlertRuleExistingCondition,
         "actions": $AzLogAlertRuleExistingActions,
         "enabled": true,
         "description": $AzLogAlertRuleExistingDescription
@@ -155,12 +235,15 @@ $BodyAzLogAlertRule = @"
       $RGScopeUPdate = $RGAlertPUT.properties.condition.allOf.anyof | Where-Object { $_.field -eq "resourceType" } |ConvertTo-Json -Depth 10
       write-output $RGScopeUPdate
       start-sleep -s 5
-      $functionURI ="https://management.azure.com/subscriptions/f5980816-b478-413b-ae0b-5fb6d820a88f/resourceGroups/vf-core-uk-resources-rg/providers/Microsoft.Web/sites/VF-Core-Function/functions/RGTY-Health-Alert-storageaccounts?api-version=2015-08-01"
-      Invoke-RestMethod -Uri $functionURI -Method Delete -Headers $header 
-      
+    }elseif ($RGTYScope.count -gt 0) {
+        $functionURI ="https://management.azure.com/subscriptions/f5980816-b478-413b-ae0b-5fb6d820a88f/resourceGroups/vf-core-uk-resources-rg/providers/Microsoft.Web/sites/VF-Core-Function/functions/RGTY-Health-Alert-sql-servers-databases?api-version=2015-08-01"
+        Invoke-RestMethod -Uri $functionURI -Method Delete -Headers $header 
+      }else {
+        write-output "No sql-servers-databases resources found"
+      } 
 
   
-}
+
 
 
 

@@ -75,7 +75,7 @@ $CustomAlertbody = @"
         "customProperties": {}
       }
     }
-  }
+  }`
 "@
 
 
@@ -85,7 +85,7 @@ $CustomAlertbody = @"
     } catch {
         throw "Terminating exception occurred. Stopping the script."
       }
-} else {
+} else  {
   $functionURI ="https://management.azure.com/subscriptions/f5980816-b478-413b-ae0b-5fb6d820a88f/resourceGroups/vf-core-uk-resources-rg/providers/Microsoft.Web/sites/VF-Core-Function/functions/PostgreSQL-flexible-server-memory-percent?api-version=2015-08-01"
   Invoke-RestMethod -Uri $functionURI -Method Delete -Headers $header 
 
