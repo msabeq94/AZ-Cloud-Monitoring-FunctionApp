@@ -138,8 +138,8 @@ if ($NEWRGScope.count -eq 1) {
     }  
    
       }
-clear
-write-output $RGScopeUPdate
+        clear
+        write-output $RGScopeUPdate
     
           
 
